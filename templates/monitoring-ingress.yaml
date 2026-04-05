@@ -1,0 +1,21 @@
+{{- if .Values.monitoringIngress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.monitoringIngress.name }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  ingressClassName: {{ .Values.global.ingressClassName }}
+  rules:
+    - http:
+        paths:
+          {{- range .Values.monitoringIngress.paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort }}
+          {{- end }}
+{{- end }}

@@ -1,0 +1,41 @@
+{{- if .Values.vehicleUi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.vehicleUi.deploymentName }}
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  replicas: {{ .Values.vehicleUi.replicaCount }}
+  selector:
+    matchLabels:
+        app: {{ .Values.vehicleUi.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.vehicleUi.appName }}
+    spec:
+      containers:
+        - name: {{ .Values.vehicleUi.containerName }}
+          image: "{{ .Values.vehicleUi.image.repository }}:{{ .Values.vehicleUi.image.tag }}"
+          imagePullPolicy: {{ .Values.vehicleUi.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.vehicleUi.containerPort }}
+
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.vehicleUi.probes.liveness.path }}
+              port: {{ .Values.vehicleUi.containerPort }}
+            initialDelaySeconds: {{ .Values.vehicleUi.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.vehicleUi.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.vehicleUi.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.vehicleUi.probes.liveness.failureThreshold }}
+
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.vehicleUi.probes.readiness.path }}
+              port: {{ .Values.vehicleUi.containerPort }}
+            initialDelaySeconds: {{ .Values.vehicleUi.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.vehicleUi.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.vehicleUi.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.vehicleUi.probes.readiness.failureThreshold }}
+{{- end }}

@@ -1,0 +1,24 @@
+{{- if .Values.nodeExporter.enabled }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.nodeExporter.name }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.nodeExporter.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.nodeExporter.appName }}
+    spec:
+      hostNetwork: {{ .Values.nodeExporter.hostNetwork }}
+      hostPID: {{ .Values.nodeExporter.hostPID }}
+      containers:
+        - name: {{ .Values.nodeExporter.containerName }}
+          image: "{{ .Values.nodeExporter.image.repository }}:{{ .Values.nodeExporter.image.tag }}"
+          imagePullPolicy: {{ .Values.nodeExporter.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.nodeExporter.containerPort }}
+{{- end }}

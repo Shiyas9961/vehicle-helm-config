@@ -1,0 +1,34 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.prometheus.deploymentName }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  replicas: {{ .Values.prometheus.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.prometheus.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.prometheus.appName }}
+    spec:
+      containers:
+      - name: {{ .Values.prometheus.containerName }}
+        image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
+        imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+        args:
+          - "--config.file=/etc/prometheus/prometheus.yml"
+          - "--web.external-url=/prometheus"
+          - "--web.route-prefix=/prometheus"
+        ports:
+          - containerPort: {{ .Values.prometheus.containerPort }}
+        volumeMounts:
+          - name: {{ .Values.prometheus.configMapName }}
+            mountPath: /etc/prometheus
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: {{ .Values.prometheus.configMapName }}
+{{- end }}

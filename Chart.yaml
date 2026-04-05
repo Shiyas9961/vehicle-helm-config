@@ -1,0 +1,5 @@
+apiVersion: v2
+name: vehicle-platform
+description: Helm chart for vehicle app, postgres, ingress, monitoring and network policies
+version: 0.1.0
+appVersion: "1.0.0"

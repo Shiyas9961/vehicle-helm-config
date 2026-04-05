@@ -1,0 +1,13 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.grafana.service.name }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  selector:
+    app: {{ .Values.grafana.appName }}
+  ports:
+    - port: {{ .Values.grafana.service.port }}
+      targetPort: {{ .Values.grafana.containerPort }}
+{{- end }}

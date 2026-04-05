@@ -1,0 +1,212 @@
+namespaces:
+  vehicle: vehicle
+  monitoring: monitoring
+
+global:
+  ingressClassName: traefik
+
+vehicleCore:
+  enabled: true
+  name: vehicle-core-service
+  deploymentName: vehicle-core-deployment
+  configMapName: vehicle-core-config
+  appName: vehicle-core-app
+  containerName: vehicle-core-container
+  replicaCount: 1
+  image:
+    repository: shiyas9961/vehicle-fast-api
+    tag: latest
+    pullPolicy: IfNotPresent
+  containerPort: 8000
+  service:
+    name: vehicle-core-service
+    type: ClusterIP
+    port: 8000
+  config:
+    postgresHost: postgres-service
+    postgresPort: "5432"
+  probes:
+    startup:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+    liveness:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+    readiness:
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      failureThreshold: 3
+
+vehicleUi:
+  enabled: true
+  deploymentName: vehicle-ui-deployment
+  appName: vehicle-ui-app
+  containerName: vehicle-ui-container
+  replicaCount: 1
+  image:
+    repository: shiyas9961/vehicle-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  containerPort: 80
+  service:
+    name: vehicle-ui-service
+    type: ClusterIP
+    port: 80
+  probes:
+    liveness:
+      path: /
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 2
+      failureThreshold: 3
+    readiness:
+      path: /
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 2
+      failureThreshold: 3
+
+postgres:
+  enabled: true
+  statefulSetName: postgres-statefulset
+  appName: postgres-app
+  containerName: postgres
+  replicaCount: 1
+  containerPort: 5432
+  image:
+    repository: postgres
+    tag: 17-alpine
+  service:
+    name: postgres-service
+    type: ClusterIP
+    port: 5432
+    headless: true
+  persistence:
+    volumeName: postgres-data
+    accessModes:
+      - ReadWriteOnce
+    storageClassName: local-path
+    size: 1Gi
+  sealedSecret:
+    enabled: true
+    name: postgres-secret
+    encryptedData:
+      POSTGRES_DB: "AgBG3uAnUOT/JKwnN0j7sxZYO8TFzwlqsxXukg9F9WO/BOxtJd3DKADWsGjqFWzZZSxKAoQhbyvVYkmeOzFf0nLks31Dj6QHGEOmk6fjRQsH/qavy/5bistrLKaY4Du+lb8iE7Nc6xUA9mHj9gCQscLRw7O7oFchBqjwXD6klsmlavflN2eu1/wC/gOegwZY+F0HkZEDuofmjGLw2t9EOcO/yqPPhvt/GcGTqWco8+IqXTG5Uyy+zv0GUkz14q50tfzC1+Hy8QOLEc3l3EnkotOqnudJ2Xqwfke/YsTroUw8jSuEeC3PTBIZ75v+kpjOJe8f0Ez7CGgprY7S78n45HjnLbcTBk4habWHVtyjlBbp8X0LsEtXjDeoriO4QSBJkBi+5HFKTuKXyFgRBGlMQNz0fHuaaqojEkcDkqtQNYb+jr6uDpqy503oJpf8ouGj3+wII1ELKznXlOhg6xvh/aBh3JP2uq0tKG0wWHK5oI07eK6AXs8zMbXds2vmlGK6vb/wb8BmWHsLiXYqvdKwmK1GYx0c5vvKVU7HcRy4GW27Io6mPkKqcN+h3QHzB4Ntk/ADD0BwVjSIQq2vLvllNSFfBjm/PAPBMwzBNfhjUHBJaRlPz+czv4Q9eJhvRdRRzZbQtADe0epJPVipoy2sKtKKHhlFFitJ9VwlnNNfrJU17pq/qGBBXmoqai7+zyFt1aDVMPT5AKQPc2NE"
+      POSTGRES_PASSWORD: "AgA8Xoy8PRUl9o8zddi95ibMUuHAiHoI8xUsrYNmFYnvYhxsj8rlKsVlyfOXJshdT3kfRmLAh/YRibn4KfYJDeB/2zyP8df/SaUxZmw0UcORrspjHaF58a2B5grtisC7QMAbZIGCEAF/LwbWV6iyT1qbe3cyxnzQ3E3rp20SWieQRFdkbTkf7QGwyAClYTDPXwZlZRQDv9zFv+Hb6s5/YPFH25nl3cEGBYncU9yrZ5GcRVrVnHQ5VN+GDXcGKXAHFWd/XsTaQjZyb1OkIUPi0lZFTeKZmQjfoiUJOJTaY3UCBRAvsbBrx/kHC06XhHhvcF7TsfOFaU2JlpkN78YCTzt0QUcWlBWcog6IuCIsXvRYKyBIku1ERU+KTRycrlD4xSd2a6KJz+JHbjvaKsxUnQtOtu5/g15Br9MtbUxLF8YGE7OgQiApcYMt0eKd31ZB9uHe+Q96YY6EoimdWAzC6RdEDDKluL/BMKDOpOPH+6QZGT5++bUwydRwy07UQFeYP/840ueGhp4j7mcWpn8KoFlyv7ceTbgO6Nzo84OhmyjqrDZv2gIMBiZFpRdN13+nKsrXhd9FZ4vHZ2sCWMNvPtu30QtiEZn8zHZjW93GRlIJ1Hrs0TL6+bKK2SpuJ35yA8KnHh+r49luvgE4uISzC0S5VmU1P83ruQOrP0z3XfrrfogTL0sTunEWL13T/gAbik8yBKhQL4UzciU="
+      POSTGRES_USER: "AgBuDjyBfE5RjxfQttSn6DPbEpNgP56QL17VJR9bh9Ya5Posiew90AxsSzMBSIdtzBsDAViiAHXhmWRu4x7eJhwc0OQkUhpBlBVX7rlP9QX5aertrfO03rQR7C/41r0TRS3bYsdLL6ZuWz3XuqHh06n0feacYgOq7SiNJ66AGImBa6/A82F1nZGBJHRCIPs4isRWQHZ0MKkAryA01IN0a3x72s5vFXmugWwURCRrmM7MRZtG0hI+I30/2f6dW86wgz88t+B06NRKXs230qjFM3ASkYeU0gGqT/l9uAYNFEPZtumVOzkvg2pOaDy9tInrLzEn6XlDGC0yopnqKT3dswLPY3TUE1Yh4R1bFlrnDWkCs125fsVhcug9aAHLQRDulHHiTjYtHw9oDqDeXE5RDPd6/T9ODBkn0BCab8HPNNabAzSHlqZE5ga5TNKDgPvhUycz+ccyLGg3oZGp05jdq1rza8wRi6mXOs7Kxx8fZcfCVoEWdnl9SgbjC/pJ0/oODJhYP1H1yqroVPTDD7tO1n8Y5zJPef8qeB/KoPnnSloXS0NqA22L1LYQOgdv5eAyVUYeP5aQt/TkQz8UNUlMp8ThND9dmIimdNlfvlM4q8xhfGvf2WCpooMj2a/mohfuzPwFlO+H4FzKanD3ecwkjwMrmwXs4CR3MFEl7tk0dymLCEQfHR316eVgF/yjw60f9gMJhqxWtng="
+
+vehicleIngress:
+  enabled: true
+  name: vehicle-ingress
+  paths:
+    - path: /
+      pathType: Prefix
+      serviceName: vehicle-ui-service
+      servicePort: 80
+    - path: /api
+      pathType: Prefix
+      serviceName: vehicle-core-service
+      servicePort: 8000
+    - path: /docs
+      pathType: Prefix
+      serviceName: vehicle-core-service
+      servicePort: 8000
+    - path: /openapi.json
+      pathType: Prefix
+      serviceName: vehicle-core-service
+      servicePort: 8000
+    - path: /health
+      pathType: Prefix
+      serviceName: vehicle-core-service
+      servicePort: 8000
+
+prometheus:
+  enabled: true
+  deploymentName: prometheus
+  appName: prometheus
+  containerName: prometheus
+  configMapName: prometheus-config
+  replicas: 1
+  containerPort: 9090
+  scrapeInterval: 15s
+  image:
+    repository: prom/prometheus
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    name: prometheus-service
+    port: 9090
+
+grafana:
+  enabled: true
+  deploymentName: grafana
+  appName: grafana
+  containerName: grafana
+  replicaCount: 1
+  containerPort: 3000
+  image:
+    repository: grafana/grafana
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 3000
+    name: grafana-service
+  env:
+    GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana"
+    GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+
+kubeStateMetrics:
+  enabled: true
+  name: kube-state-metrics
+  appName: kube-state-metrics
+  containerName: kube-state-metrics
+  replicaCount: 1
+  containerPort: 8080
+  image:
+    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    tag: v2.10.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 8080
+    name: kube-state-metrics-service
+
+nodeExporter:
+  enabled: true
+  name: node-exporter
+  appName: node-exporter
+  containerName: node-exporter
+  containerPort: 9100
+  hostNetwork: true
+  hostPID: true
+  image:
+    repository: prom/node-exporter
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 9100
+    name: node-exporter-service
+
+monitoringIngress:
+  enabled: true
+  name: monitoring-ingress
+  paths:
+    - path: /grafana
+      pathType: Prefix
+      serviceName: grafana-service
+      servicePort: 3000
+    - path: /prometheus
+      pathType: Prefix
+      serviceName: prometheus-service
+      servicePort: 9090
+
+networkPolicy:
+  enabled: true
+  traefikNamespace: traefik
+  kubeSystemNamespace: kube-system
+  kubeDnsLabel: kube-dns
+  kubernetesApiIp: 10.96.0.1/32

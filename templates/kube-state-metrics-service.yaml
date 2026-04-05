@@ -1,0 +1,13 @@
+{{- if .Values.kubeStateMetrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.kubeStateMetrics.service.name }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  selector:
+    app: {{ .Values.kubeStateMetrics.appName }}
+  ports:
+    - port: {{ .Values.kubeStateMetrics.service.port }}
+      targetPort: {{ .Values.kubeStateMetrics.containerPort }}
+{{- end }}

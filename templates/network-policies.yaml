@@ -1,0 +1,281 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vehicle-default-deny
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vehicle-allow-dns-egress
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.kubeSystemNamespace }}
+          podSelector:
+            matchLabels:
+              k8s-app: {{ .Values.networkPolicy.kubeDnsLabel }}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vehicle-allow-ui-ingress
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.vehicleUi.appName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.traefikNamespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vehicleUi.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vehicle-allow-core-ingress
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.vehicleCore.appName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.traefikNamespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vehicleCore.service.port }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.namespaces.monitoring }}
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vehicleCore.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vehicle-allow-core-egress
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.vehicleCore.appName }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.postgres.appName }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.postgres.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-default-deny
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-dns-egress
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.kubeSystemNamespace }}
+          podSelector:
+            matchLabels:
+              k8s-app: {{ .Values.networkPolicy.kubeDnsLabel }}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-allow-prometheus-ingress
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.prometheus.appName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.traefikNamespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.prometheus.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-allow-grafana-ingress
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.grafana.appName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.traefikNamespace }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.grafana.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-allow-node-exporter-ingress
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.nodeExporter.appName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.prometheus.appName }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.nodeExporter.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-allow-kube-stats-ingress
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.kubeStateMetrics.appName }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.prometheus.appName }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.kubeStateMetrics.service.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-allow-kube-state-metrics-egress
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.kubeStateMetrics.appName }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.kubernetesApiIp }}
+      ports:
+        - protocol: TCP
+          port: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-allow-prometheus-scrape
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.prometheus.appName }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.namespaces.monitoring }}
+          podSelector:
+            matchLabels:
+              app: {{ .Values.nodeExporter.appName }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.nodeExporter.service.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.namespaces.monitoring }}
+          podSelector:
+            matchLabels:
+              app: {{ .Values.kubeStateMetrics.appName }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.kubeStateMetrics.service.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.namespaces.vehicle }}
+          podSelector:
+            matchLabels:
+              app: {{ .Values.vehicleCore.appName }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vehicleCore.service.port }}
+{{- end }}

@@ -1,0 +1,74 @@
+{{- if .Values.vehicleCore.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.vehicleCore.deploymentName }}
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  replicas: {{ .Values.vehicleCore.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.vehicleCore.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.vehicleCore.appName }}
+    spec:
+      containers:
+      - name: {{ .Values.vehicleCore.containerName }}
+        image: "{{ .Values.vehicleCore.image.repository }}:{{ .Values.vehicleCore.image.tag }}"
+        imagePullPolicy: {{ .Values.vehicleCore.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.vehicleCore.containerPort }}
+        env:
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.sealedSecret.name }}
+                key: POSTGRES_USER
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.sealedSecret.name }}
+                key: POSTGRES_PASSWORD
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.postgres.sealedSecret.name }}
+                key: POSTGRES_DB
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.vehicleCore.configMapName }}
+                key: POSTGRES_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.vehicleCore.configMapName }}
+                key: POSTGRES_PORT
+
+        startupProbe:
+          httpGet:
+            path: {{ .Values.vehicleCore.probes.startup.path }}
+            port: {{ .Values.vehicleCore.containerPort }}
+          initialDelaySeconds: {{ .Values.vehicleCore.probes.startup.initialDelaySeconds }}
+          periodSeconds: {{ .Values.vehicleCore.probes.startup.periodSeconds }}
+          failureThreshold: {{ .Values.vehicleCore.probes.startup.failureThreshold }}
+
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.vehicleCore.probes.liveness.path }}
+            port: {{ .Values.vehicleCore.containerPort }}
+          initialDelaySeconds: {{ .Values.vehicleCore.probes.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.vehicleCore.probes.liveness.periodSeconds }}
+          failureThreshold: {{ .Values.vehicleCore.probes.liveness.failureThreshold }}
+
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.vehicleCore.probes.readiness.path }}
+            port: {{ .Values.vehicleCore.containerPort }}
+          initialDelaySeconds: {{ .Values.vehicleCore.probes.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.vehicleCore.probes.readiness.periodSeconds }}
+          failureThreshold: {{ .Values.vehicleCore.probes.readiness.failureThreshold }}
+
+{{- end }}

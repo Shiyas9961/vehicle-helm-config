@@ -1,0 +1,23 @@
+vehicleCore:
+  replicaCount: 1
+  image:
+    tag: latest
+
+vehicleUi:
+  replicaCount: 1
+  image:
+    tag: latest
+
+postgres:
+  replicaCount: 1
+  image:
+    tag: 17-alpine
+
+prometheus:
+  replicas: 1
+
+grafana:
+  replicaCount: 1
+
+kubeStateMetrics:
+  replicaCount: 1

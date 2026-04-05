@@ -1,0 +1,23 @@
+{{- if .Values.kubeStateMetrics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.kubeStateMetrics.name }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  replicas: {{ .Values.kubeStateMetrics.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.kubeStateMetrics.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.kubeStateMetrics.appName }}
+    spec:
+      containers:
+        - name: {{ .Values.kubeStateMetrics.containerName }}
+          image: "{{ .Values.kubeStateMetrics.image.repository }}:{{ .Values.kubeStateMetrics.image.tag }}"
+          imagePullPolicy: {{ .Values.kubeStateMetrics.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.kubeStateMetrics.containerPort }}
+{{- end }}

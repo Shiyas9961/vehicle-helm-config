@@ -1,0 +1,28 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.grafana.deploymentName }}
+  namespace: {{ .Values.namespaces.monitoring }}
+spec:
+  replicas: {{ .Values.grafana.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.grafana.appName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.grafana.appName }}
+    spec:
+      containers:
+        - name: {{ .Values.grafana.containerName }}
+          image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
+          imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.grafana.containerPort }}
+          env:
+            - name: GF_SERVER_ROOT_URL
+              value: {{ .Values.grafana.env.GF_SERVER_ROOT_URL | quote }}
+            - name: GF_SERVER_SERVE_FROM_SUB_PATH
+              value: {{ .Values.grafana.env.GF_SERVER_SERVE_FROM_SUB_PATH | quote }}
+{{- end }}

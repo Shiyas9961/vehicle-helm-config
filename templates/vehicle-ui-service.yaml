@@ -1,0 +1,14 @@
+{{- if .Values.vehicleUi.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.vehicleUi.service.name }}
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  selector:
+    app: {{ .Values.vehicleUi.appName }}
+  type: {{ .Values.vehicleUi.service.type }}
+  ports:
+    - port: {{ .Values.vehicleUi.service.port }}
+      targetPort: {{ .Values.vehicleUi.containerPort }}
+{{- end }}

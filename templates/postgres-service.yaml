@@ -1,0 +1,17 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.postgres.service.name }}
+  namespace: {{ .Values.namespaces.vehicle }}
+spec:
+  {{- if .Values.postgres.service.headless }}
+  clusterIP : None
+  {{- end }}
+  selector:
+    app: {{ .Values.postgres.appName }}
+  type: {{ .Values.postgres.service.type }}
+  ports:
+    - port: {{ .Values.postgres.service.port }}
+      targetPort: {{ .Values.postgres.containerPort }}
+{{- end }}
