@@ -23,7 +23,7 @@ vehicleCore:
     type: ClusterIP
     port: 8000
   config:
-    postgresHost: postgres-service
+    postgresHost: "postgres-service"
     postgresPort: "5432"
   probes:
     startup:
