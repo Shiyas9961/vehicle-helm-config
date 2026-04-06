@@ -31,16 +31,21 @@ vehicleCore:
       initialDelaySeconds: 30
       periodSeconds: 10
       failureThreshold: 3
+      timeoutSeconds: 2
+      
     liveness:
       path: /health
       initialDelaySeconds: 30
       periodSeconds: 10
       failureThreshold: 3
+      timeoutSeconds: 2
+
     readiness:
       path: /health
-      initialDelaySeconds: 10
+      initialDelaySeconds: 30
       periodSeconds: 5
       failureThreshold: 3
+      timeoutSeconds: 2
 
 vehicleUi:
   enabled: true
@@ -60,13 +65,13 @@ vehicleUi:
   probes:
     liveness:
       path: /
-      initialDelaySeconds: 15
+      initialDelaySeconds: 30
       periodSeconds: 10
       timeoutSeconds: 2
       failureThreshold: 3
     readiness:
       path: /
-      initialDelaySeconds: 5
+      initialDelaySeconds: 30
       periodSeconds: 5
       timeoutSeconds: 2
       failureThreshold: 3

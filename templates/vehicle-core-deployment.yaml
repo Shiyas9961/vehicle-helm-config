@@ -17,7 +17,6 @@ spec:
       containers:
       - name: {{ .Values.vehicleCore.containerName }}
         image: "{{ .Values.vehicleCore.image.repository }}:{{ .Values.vehicleCore.image.tag }}"
-        imagePullPolicy: {{ .Values.vehicleCore.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.vehicleCore.containerPort }}
         env:
@@ -53,6 +52,7 @@ spec:
             port: {{ .Values.vehicleCore.containerPort }}
           initialDelaySeconds: {{ .Values.vehicleCore.probes.startup.initialDelaySeconds }}
           periodSeconds: {{ .Values.vehicleCore.probes.startup.periodSeconds }}
+          timeoutSeconds: {{ .Values.vehicleCore.probes.startup.timeoutSeconds }}
           failureThreshold: {{ .Values.vehicleCore.probes.startup.failureThreshold }}
 
         livenessProbe:
@@ -61,6 +61,7 @@ spec:
             port: {{ .Values.vehicleCore.containerPort }}
           initialDelaySeconds: {{ .Values.vehicleCore.probes.liveness.initialDelaySeconds }}
           periodSeconds: {{ .Values.vehicleCore.probes.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.vehicleCore.probes.liveness.timeoutSeconds }}
           failureThreshold: {{ .Values.vehicleCore.probes.liveness.failureThreshold }}
 
         readinessProbe:
@@ -69,6 +70,7 @@ spec:
             port: {{ .Values.vehicleCore.containerPort }}
           initialDelaySeconds: {{ .Values.vehicleCore.probes.readiness.initialDelaySeconds }}
           periodSeconds: {{ .Values.vehicleCore.probes.readiness.periodSeconds }}
+          timeoutSeconds: {{ .Values.vehicleCore.probes.readiness.timeoutSeconds }}
           failureThreshold: {{ .Values.vehicleCore.probes.readiness.failureThreshold }}
 
 {{- end }}
