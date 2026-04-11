@@ -7,7 +7,6 @@ metadata:
 spec:
   selector:
     app: {{ .Values.nodeExporter.appName }}
-  clusterIP: None
   ports:
     - port: {{ .Values.nodeExporter.service.port }}
       targetPort: {{ .Values.nodeExporter.containerPort }}
