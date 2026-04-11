@@ -266,6 +266,13 @@ spec:
           port: {{ .Values.nodeExporter.service.port }}
 
     - to:
+        - ipBlock:
+            cidr: 192.168.100.0/24
+      ports:
+        - protocol: TCP
+          port: {{ .Values.nodeExporter.service.port }}
+
+    - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: {{ .Values.namespaces.monitoring }}
