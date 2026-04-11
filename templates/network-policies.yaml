@@ -258,6 +258,7 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.nodeExporter.service.port }}
+
     - to:
         - namespaceSelector:
             matchLabels:
@@ -268,6 +269,7 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.kubeStateMetrics.service.port }}
+
     - to:
         - namespaceSelector:
             matchLabels:
@@ -278,7 +280,6 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.vehicleCore.service.port }}
-{{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -299,3 +300,4 @@ spec:
       ports:
         - protocol: TCP
           port: {{ .Values.prometheus.service.port }}
+{{- end }}
